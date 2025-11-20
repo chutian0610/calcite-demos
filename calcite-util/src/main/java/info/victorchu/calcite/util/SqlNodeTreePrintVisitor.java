@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.*;
 import org.apache.calcite.sql.util.SqlBasicVisitor;
 
+import java.util.stream.Collectors;
+
 /**
  * @author victorchu
  * @date 2022/7/14 11:32
@@ -32,7 +34,9 @@ public class SqlNodeTreePrintVisitor extends SqlBasicVisitor<Object> {
 
     @Override
     public Object visit(SqlLiteral literal) {
-        log.info("{}SqlLiteral: type={} value={}",getLogPrefix(),literal.getTypeName(),String.valueOf(literal.getValue()));
+        log.info("{}SqlLiteral[{}]: type={} value={}",getLogPrefix(),
+                literal.getParserPosition().toString(),
+                literal.getTypeName(),String.valueOf(literal.getValue()));
         depth++;
         super.visit(literal);
         depth--;
@@ -41,7 +45,19 @@ public class SqlNodeTreePrintVisitor extends SqlBasicVisitor<Object> {
 
     @Override
     public Object visit(SqlCall call) {
-        log.info("{}SqlCall: SqlOperator={}",getLogPrefix(),call.getOperator());
+        log.info("{}SqlCall[{}]: SqlOperator={},OperandList=[{}]",getLogPrefix(),
+                call.getParserPosition().toString(),call.getOperator(),
+                call.getOperandList().stream().map(
+                        x->{
+                            if(x == null){
+                                return "NULL";
+                            }
+                            if (x instanceof SqlNodeList && ((SqlNodeList) x).isEmpty()){
+                                return "[]";
+                            }
+                            return x.toString();
+                        }
+                ).collect(Collectors.joining(",")));
         depth++;
         super.visit(call);
         depth--;
@@ -50,7 +66,11 @@ public class SqlNodeTreePrintVisitor extends SqlBasicVisitor<Object> {
 
     @Override
     public Object visit(SqlNodeList nodeList) {
-        log.info("{}SqlNodeList: nodeList={}",getLogPrefix(),nodeList.toString());
+        if(nodeList.isEmpty()){
+            log.info("{}SqlNodeList[{}]: nodeList=[]", getLogPrefix(),nodeList.getParserPosition().toString());
+        }else {
+            log.info("{}SqlNodeList[{}]: nodeList={}", getLogPrefix(),nodeList.getParserPosition().toString(), nodeList.toString());
+        }
         depth++;
         super.visit(nodeList);
         depth--;
@@ -59,7 +79,7 @@ public class SqlNodeTreePrintVisitor extends SqlBasicVisitor<Object> {
 
     @Override
     public Object visit(SqlIdentifier id) {
-        log.info("{}SqlIdentifier: name={}",getLogPrefix(),id.toString());
+        log.info("{}SqlIdentifier[{}]: name={}",getLogPrefix(),id.getParserPosition().toString(),id.toString());
         depth++;
         super.visit(id);
         depth--;
@@ -68,7 +88,7 @@ public class SqlNodeTreePrintVisitor extends SqlBasicVisitor<Object> {
 
     @Override
     public Object visit(SqlDataTypeSpec type) {
-        log.info("{}SqlDataTypeSpec: name={}",getLogPrefix(),type.toString());
+        log.info("{}SqlDataTypeSpec[{}]: name={}",getLogPrefix(),type.getParserPosition().toString(),type.toString());
         depth++;
         super.visit(type);
         depth--;
@@ -77,7 +97,7 @@ public class SqlNodeTreePrintVisitor extends SqlBasicVisitor<Object> {
 
     @Override
     public Object visit(SqlDynamicParam param) {
-        log.info("{}SqlDynamicParam: name={}",getLogPrefix(),param.toString());
+        log.info("{}SqlDynamicParam[{}]: name={}",getLogPrefix(),param.getParserPosition().toString(),param.toString());
         depth++;
         super.visit(param);
         depth--;
@@ -86,7 +106,7 @@ public class SqlNodeTreePrintVisitor extends SqlBasicVisitor<Object> {
 
     @Override
     public Object visit(SqlIntervalQualifier intervalQualifier) {
-        log.info("{}SqlIntervalQualifier: name={}",getLogPrefix(),intervalQualifier.toString());
+        log.info("{}SqlIntervalQualifier[{}]: name={}",getLogPrefix(),intervalQualifier.getParserPosition().toString(),intervalQualifier.toString());
         depth++;
         super.visit(intervalQualifier);
         depth--;

@@ -27,6 +27,16 @@
                 <artifactId>calcite-core</artifactId>
                 <version>${calcite.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.calcite</groupId>
+                <artifactId>calcite-babel</artifactId>
+                <version>${calcite.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.calcite</groupId>
+                <artifactId>calcite-server</artifactId>
+                <version>${calcite.version}</version>
+            </dependency>
 
             <!-- Slf4j 依赖 -->
             <dependency>

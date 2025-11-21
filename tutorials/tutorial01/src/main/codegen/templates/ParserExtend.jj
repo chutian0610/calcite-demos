@@ -2227,7 +2227,7 @@ SqlNode TableRef3(ExprContext exprContext, boolean lateral) :
     SqlUnnestOperator unnestOp = SqlStdOperatorTable.UNNEST;
 }
 {
-    (   // @sql-extend
+    (   // @extend
         LOOKAHEAD(2)
         tableName = DynamicTableIdentifier() { s = span(); tableRef = tableName; }
     |
@@ -5685,9 +5685,7 @@ SqlIdentifier CompoundIdentifier() :
     }
 }
 
-/**
- * sql extend rule
- */
+//@extend
 SqlIdentifier DynamicTableIdentifier() :
 {
     final String id;

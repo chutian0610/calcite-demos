@@ -14,7 +14,19 @@ import org.junit.jupiter.api.Test;
 public class CalciteSqlExtendParserTest {
     @SneakyThrows
     @Test
-    public void defaultParse(){
+    public void defaultParseError(){
+        String sql = "select name from ${users}";
+        SqlParser sqlParser = SqlParser.create(sql, SqlParser.Config.DEFAULT);
+        Assertions.assertThrows(SqlParseException.class,() ->{
+            SqlNode node = sqlParser.parseQuery();
+            SqlNodeTreePrintVisitor visitor = new SqlNodeTreePrintVisitor();
+            node.accept(visitor);
+        });
+
+    }
+    @SneakyThrows
+    @Test
+    public void extendParse(){
         String sql = "select name from ${users}";
         SqlParser sqlParser = SqlParser.create(sql, SqlParser.Config.DEFAULT.withParserFactory(SqlExtendParserImpl.FACTORY));
         SqlNode node = sqlParser.parseQuery();
@@ -23,7 +35,7 @@ public class CalciteSqlExtendParserTest {
     }
     @SneakyThrows
     @Test
-    public void extendParse(){
+    public void extendParseError(){
         String sql = "select name from ${sys.users}";
         SqlParser sqlParser = SqlParser.create(sql, SqlParser.Config.DEFAULT.withParserFactory(SqlExtendParserImpl.FACTORY));
         Assertions.assertThrows(SqlParseException.class,() ->{

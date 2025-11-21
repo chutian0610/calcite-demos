@@ -106,7 +106,9 @@ public class SqlNodeTreePrintVisitor extends SqlBasicVisitor<Object> {
 
     @Override
     public Object visit(SqlIntervalQualifier intervalQualifier) {
-        log.info("{}SqlIntervalQualifier[{}]: name={}",getLogPrefix(),intervalQualifier.getParserPosition().toString(),intervalQualifier.toString());
+        log.info("{}SqlIntervalQualifier[{}]: timeFrameName={} timeUnitRange={} startPrecision={} fractionalSecondPrecision={}",getLogPrefix(),intervalQualifier.getParserPosition().toString()
+                ,intervalQualifier.timeFrameName,intervalQualifier.timeUnitRange,intervalQualifier.getStartPrecisionPreservingDefault(),
+                intervalQualifier.getFractionalSecondPrecisionPreservingDefault());
         depth++;
         super.visit(intervalQualifier);
         depth--;

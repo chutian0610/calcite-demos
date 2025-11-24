@@ -28,4 +28,14 @@ public class CalciteSqlNodeTest {
         SqlNodeTreePrintVisitor visitor = new SqlNodeTreePrintVisitor();
         node.accept(visitor);
     }
+
+    @SneakyThrows
+    @Test
+    public void sqlToNode03(){
+        String sql = "SELECT NOW(), INTERVAL 2 DAY FROM orders";
+        SqlParser sqlParser = SqlParser.create(sql, SqlParser.Config.DEFAULT);
+        SqlNode node = sqlParser.parseQuery();
+        SqlNodeTreePrintVisitor visitor = new SqlNodeTreePrintVisitor();
+        node.accept(visitor);
+    }
 }

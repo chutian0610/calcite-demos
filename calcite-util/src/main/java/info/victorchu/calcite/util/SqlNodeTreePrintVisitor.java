@@ -45,8 +45,10 @@ public class SqlNodeTreePrintVisitor extends SqlBasicVisitor<Object> {
 
     @Override
     public Object visit(SqlCall call) {
-        log.info("{}SqlCall[{}]: SqlOperator={},OperandList=[{}]",getLogPrefix(),
-                call.getParserPosition().toString(),call.getOperator(),
+        log.info("{}SqlCall[{}]: type={} SqlOperator={},OperandList=[{}]",getLogPrefix(),
+                call.getParserPosition().toString(),
+                call.getClass().getSimpleName(),
+                call.getOperator(),
                 call.getOperandList().stream().map(
                         x->{
                             if(x == null){
@@ -67,7 +69,7 @@ public class SqlNodeTreePrintVisitor extends SqlBasicVisitor<Object> {
     @Override
     public Object visit(SqlNodeList nodeList) {
         if(nodeList.isEmpty()){
-            log.info("{}SqlNodeList[{}]: nodeList=[]", getLogPrefix(),nodeList.getParserPosition().toString());
+            return null;
         }else {
             log.info("{}SqlNodeList[{}]: nodeList={}", getLogPrefix(),nodeList.getParserPosition().toString(), nodeList.toString());
         }

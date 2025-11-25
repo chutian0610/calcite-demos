@@ -38,4 +38,13 @@ public class CalciteSqlNodeTest {
         SqlNodeTreePrintVisitor visitor = new SqlNodeTreePrintVisitor();
         node.accept(visitor);
     }
+    @SneakyThrows
+    @Test
+    public void sqlToNode04(){
+        String sql = "SELECT NOW(), IF(type>1,'true','false') orders";
+        SqlParser sqlParser = SqlParser.create(sql, SqlParser.Config.DEFAULT);
+        SqlNode node = sqlParser.parseQuery();
+        SqlNodeTreePrintVisitor visitor = new SqlNodeTreePrintVisitor();
+        node.accept(visitor);
+    }
 }

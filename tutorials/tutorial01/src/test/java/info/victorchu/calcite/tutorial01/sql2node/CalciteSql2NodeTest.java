@@ -1,13 +1,12 @@
-package info.victorchu.calcite.tutorial01.sqlnode;
+package info.victorchu.calcite.tutorial01.sql2node;
 
 import info.victorchu.calcite.util.SqlNodeTreePrintVisitor;
 import lombok.SneakyThrows;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParser;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class CalciteSqlNodeTest {
+public class CalciteSql2NodeTest {
 
     @SneakyThrows
     @Test

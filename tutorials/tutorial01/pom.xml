@@ -91,6 +91,26 @@
 <!--                </executions>-->
 <!--            </plugin>-->
             <plugin>
+                <!-- a hint for IDE's to add the java sources to the classpath -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>add-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
@@ -150,7 +170,7 @@
                             <!-- This must be kept synced with Apache Calcite. -->
                             <lookAhead>1</lookAhead>
                             <isStatic>false</isStatic>
-                            <outputDirectory>${project.build.directory}/generated-sources/</outputDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources/java</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>

@@ -1,4 +1,4 @@
-FROM mysql:8.0
+FROM mysql:latest
 
 # 设置环境变量
 ENV MYSQL_ROOT_PASSWORD=root

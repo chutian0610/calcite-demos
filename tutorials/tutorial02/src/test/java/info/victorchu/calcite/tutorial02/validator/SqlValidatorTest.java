@@ -25,6 +25,7 @@ public class SqlValidatorTest {
     public static void setUp() throws SQLException {
         // 创建连接
         Properties info = new Properties();
+        // lex 为 MYSQL 时，大小写敏感。默认是 Oracle，大小写不敏感。
         info.setProperty("lex", "MYSQL");
         Connection connection = DriverManager.getConnection("jdbc:calcite:", info);
         calciteConnection = connection.unwrap(CalciteConnection.class);

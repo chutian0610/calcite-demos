@@ -19,7 +19,7 @@ do
 done
 
 # 导入 CSV 文件
-for csv_file in /docker-entrypoint-initdb.d/data-files/*.csv;
+for csv_file in /var/lib/mysql-files/data-files/*.csv;
 do
   if [ -f "$csv_file" ]; then
     table_name=$(basename "$csv_file" .csv)
@@ -27,10 +27,9 @@ do
     mysql -h localhost -u root -p"$MYSQL_ROOT_PASSWORD" -e "
       LOAD DATA INFILE '$csv_file' 
       INTO TABLE $table_name 
-      FIELDS TERMINATED BY ',' 
+      FIELDS TERMINATED BY '|'
       ENCLOSED BY '\"' 
-      LINES TERMINATED BY '\n' 
-      IGNORE 1 ROWS;
+      LINES TERMINATED BY '\n';
     " "$MYSQL_DATABASE"
   fi
 done

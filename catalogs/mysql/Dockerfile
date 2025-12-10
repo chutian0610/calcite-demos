@@ -18,7 +18,7 @@ RUN chmod +x /docker-entrypoint-initdb.d/import-data.sh
 COPY ./dataset/schema /docker-entrypoint-initdb.d/import-scripts
 
 # 复制文件到容器中, 并解压
-ADD ./dataset/data/data.tar.gz /docker-entrypoint-initdb.d/data-files
+ADD ./dataset/data/data.tar.gz /var/lib/mysql-files/data-files
 
 # 暴露 MySQL 端口
 EXPOSE 3306

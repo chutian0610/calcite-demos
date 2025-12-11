@@ -17,14 +17,31 @@ public class ResultSetFormatter {
     public ResultSetFormatter resultSet(ResultSet resultSet)
             throws SQLException {
         final ResultSetMetaData metaData = resultSet.getMetaData();
-        buf.append("ResultSet Data:\n");
+        buf.append("ResultSet Content:\n");
+        buf.append("# ResultSet Schema:\n");
+        buf.append(getRowSchema(metaData)).append("\n");
+        buf.append("# ResultSet Data:\n");
         while (resultSet.next()) {
             rowToString(resultSet, metaData);
             buf.append("\n");
         }
         return this;
     }
-
+    String getRowSchema(ResultSetMetaData metaData) throws SQLException {
+        StringBuilder schema = new StringBuilder();
+        int n = metaData.getColumnCount();
+        if (n > 0) {
+            schema.append("|");
+            for (int i = 1;i<=n; i++) {
+                schema.append(metaData.getColumnLabel(i))
+                        .append("(")
+                        .append(metaData.getColumnTypeName(i))
+                        .append(")")
+                        .append("|");
+            }
+        }
+        return schema.toString();
+    }
     /** Converts one row to a string. */
     ResultSetFormatter rowToString(ResultSet resultSet,
                                    ResultSetMetaData metaData) throws SQLException {

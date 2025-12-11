@@ -28,8 +28,7 @@ public class CalciteNode2SqlTest {
         SqlNodeTreePrintVisitor visitor = new SqlNodeTreePrintVisitor();
         node.accept(visitor);
         String formatSql = node.toSqlString(MysqlSqlDialect.DEFAULT).getSql();
-        System.out.println(formatSql);
-//        Assertions.assertEquals("SELECT `NAME`\n" +
-//                "FROM `USERS`",prestoSql);
+        Assertions.assertEquals("SELECT `C1` + `C2` + `C3`\n" +
+                "FROM `USERS`" ,formatSql);
     }
 }

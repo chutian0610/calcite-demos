@@ -17,6 +17,7 @@ public class ResultSetFormatter {
     public ResultSetFormatter resultSet(ResultSet resultSet)
             throws SQLException {
         final ResultSetMetaData metaData = resultSet.getMetaData();
+        buf.append("ResultSet Data:\n");
         while (resultSet.next()) {
             rowToString(resultSet, metaData);
             buf.append("\n");
@@ -29,14 +30,12 @@ public class ResultSetFormatter {
                                    ResultSetMetaData metaData) throws SQLException {
         int n = metaData.getColumnCount();
         if (n > 0) {
-            for (int i = 1;; i++) {
+            buf.append("|");
+            for (int i = 1;i<n; i++) {
                 buf.append(metaData.getColumnLabel(i))
                         .append("=")
                         .append(adjustValue(resultSet.getString(i)));
-                if (i == n) {
-                    break;
-                }
-                buf.append("; ");
+                buf.append("|");
             }
         }
         return this;

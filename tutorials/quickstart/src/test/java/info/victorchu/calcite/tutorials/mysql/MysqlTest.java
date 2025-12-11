@@ -1,7 +1,6 @@
-package info.victorchu.calcite.tutorial02.validator;
+package info.victorchu.calcite.tutorials.mysql;
 
 import info.victorchu.calcite.util.ResultSetFormatter;
-import org.apache.calcite.adapter.java.ReflectiveSchema;
 import org.apache.calcite.adapter.jdbc.JdbcSchema;
 import org.apache.calcite.jdbc.CalciteConnection;
 import org.apache.calcite.schema.Schema;
@@ -17,8 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-public class SqlValidatorTest {
-    public static Logger logger = LoggerFactory.getLogger(SqlValidatorTest.class);
+public class MysqlTest {
+    public static Logger logger = LoggerFactory.getLogger(MysqlTest.class);
     private static CalciteConnection calciteConnection;
 
     @BeforeAll
@@ -43,7 +42,7 @@ public class SqlValidatorTest {
     }
 
     @Test
-    public void testQuery() throws SQLException {
+    public void testQuery01() throws SQLException {
         // 创建语句
         Statement statement = calciteConnection.createStatement();
         // 执行语句

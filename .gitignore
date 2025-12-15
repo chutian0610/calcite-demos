@@ -86,3 +86,6 @@ jdk.properties
 
 .vscode
 .vscode/
+
+
+calcite.session.sql

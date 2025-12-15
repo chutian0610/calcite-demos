@@ -14,6 +14,8 @@ import org.apache.calcite.prepare.CalciteSqlValidator;
 import org.apache.calcite.schema.Schema;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlOperatorTable;
+import org.apache.calcite.sql.fun.SqlLibrary;
+import org.apache.calcite.sql.fun.SqlLibraryOperatorTableFactory;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
@@ -35,7 +37,8 @@ public class SqlValidatorTest {
     static CalciteCatalogReader catalogReader;
     static SqlParser.Config  parserConfig;
     static SqlValidator.Config validatorConfig;
-    static SqlOperatorTable sqlOperatorTable;
+    static SqlOperatorTable stdSqlOperatorTable;
+    static SqlOperatorTable mySQLOperatorTable;
 
     @BeforeAll
     public static void setUp() {
@@ -76,13 +79,19 @@ public class SqlValidatorTest {
                 config);
     }
     private static void initSqlOperatorTable(){
-        final SqlOperatorTable opTab0 =
-                config.fun(SqlOperatorTable.class,
-                        SqlStdOperatorTable.instance());
-        final List<SqlOperatorTable> list = new ArrayList<>();
-        list.add(opTab0);
-        list.add(catalogReader);
-        sqlOperatorTable = SqlOperatorTables.chain(list);
+        final SqlOperatorTable opTab0 = SqlLibraryOperatorTableFactory.INSTANCE
+                .getOperatorTable(SqlLibrary.STANDARD);
+        final List<SqlOperatorTable> list0 = new ArrayList<>();
+        list0.add(opTab0);
+        list0.add(catalogReader);
+        stdSqlOperatorTable = SqlOperatorTables.chain(list0);
+
+          final SqlOperatorTable opTab1 = SqlLibraryOperatorTableFactory.INSTANCE
+                .getOperatorTable(SqlLibrary.STANDARD,SqlLibrary.MYSQL);
+        final List<SqlOperatorTable> list1 = new ArrayList<>();
+        list1.add(opTab1);
+        list1.add(catalogReader);
+        mySQLOperatorTable = SqlOperatorTables.chain(list1);
     }
     private static void initSchema() {
         rootSchema =  CalciteSchema.createRootSchema(false);
@@ -109,7 +118,7 @@ public class SqlValidatorTest {
         }
         SqlNodeTreePrintVisitor visitor = new SqlNodeTreePrintVisitor();
         sqlNode.accept(visitor);
-        SqlValidator sqlValidator =  new CalciteSqlValidator(sqlOperatorTable, catalogReader, typeFactory,
+        SqlValidator sqlValidator =  new CalciteSqlValidator(stdSqlOperatorTable, catalogReader, typeFactory,
                 validatorConfig);
         sqlValidator.validate(sqlNode);
         SqlNodeTreePrintVisitor visitor2 = new SqlNodeTreePrintVisitor();
@@ -127,14 +136,14 @@ public class SqlValidatorTest {
                     "parse failed: " + e.getMessage(), e);
         }
         // use ExtendCalciteSqlValidator to validate sqlNode
-        SqlValidator sqlValidator =  new ExtendCalciteSqlValidator(sqlOperatorTable, catalogReader, typeFactory,
+        SqlValidator sqlValidator =  new ExtendCalciteSqlValidator(stdSqlOperatorTable, catalogReader, typeFactory,
                 validatorConfig);
         sqlValidator.validate(sqlNode);
     }
     @Test
     public void testQuery03(){
         String sql = "select o_custkey, count(*) as order_count\n" +
-                "from orders\n" +
+                "from mysql.orders\n" +
                 "group by o_custkey\n" +
                 "order by order_count desc\n" +
                 "limit 10";
@@ -147,7 +156,26 @@ public class SqlValidatorTest {
                     "parse failed: " + e.getMessage(), e);
         }
         // use ExtendCalciteSqlValidator to validate sqlNode
-        SqlValidator sqlValidator =  new ExtendCalciteSqlValidator(sqlOperatorTable, catalogReader, typeFactory,
+        SqlValidator sqlValidator =  new ExtendCalciteSqlValidator(stdSqlOperatorTable, catalogReader, typeFactory,
+                validatorConfig);
+        sqlValidator.validate(sqlNode);
+    }
+     @Test
+    public void testQuery04(){
+        String sql = "SELECT `o_custkey`, GROUP_CONCAT(`o_orderpriority`)\n" + //
+                        "FROM mysql.`orders`\n" + //
+                        "GROUP BY `o_custkey`\n" + //
+                        "LIMIT 10";
+        SqlParser parser = SqlParser.create(sql, parserConfig);
+        SqlNode sqlNode;
+        try {
+            sqlNode = parser.parseStmt();
+        } catch (SqlParseException e) {
+            throw new RuntimeException(
+                    "parse failed: " + e.getMessage(), e);
+        }
+        // use ExtendCalciteSqlValidator to validate sqlNode
+        SqlValidator sqlValidator =  new ExtendCalciteSqlValidator(mySQLOperatorTable, catalogReader, typeFactory,
                 validatorConfig);
         sqlValidator.validate(sqlNode);
     }

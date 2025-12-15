@@ -13,6 +13,21 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SqlNodeTreePrintVisitor extends SqlBasicVisitor<Object> {
 
+    boolean withPosition = false;
+    boolean withDetail = false;
+    boolean ignoreEmptyNodeList = true;
+
+    public SqlNodeTreePrintVisitor() {
+        super();
+    }
+
+    public SqlNodeTreePrintVisitor(boolean withPosition, boolean withDetail,boolean ignoreEmptyNodeList) {
+        super();
+        this.withPosition = withPosition;
+        this.withDetail = withDetail;
+        this.ignoreEmptyNodeList = ignoreEmptyNodeList;
+    }
+
     private int depth = 0;
 
     private String getLogPrefix() {
@@ -27,16 +42,15 @@ public class SqlNodeTreePrintVisitor extends SqlBasicVisitor<Object> {
         return sb.toString();
     }
 
-
-    public SqlNodeTreePrintVisitor() {
-        super();
-    }
-
     @Override
     public Object visit(SqlLiteral literal) {
-        log.info("{}SqlLiteral[{}]: type={} value={}",getLogPrefix(),
-                literal.getParserPosition().toString(),
-                literal.getTypeName(),String.valueOf(literal.getValue()));
+        StringBuilder sb = new StringBuilder();
+        sb.append(getLogPrefix()).append("SqlLiteral");
+        if (withPosition) {
+            sb.append("[").append(literal.getParserPosition().toString()).append("]");
+        }
+        sb.append(": type=").append(literal.getTypeName()).append(" value=").append(String.valueOf(literal.getValue()));
+        log.info(sb.toString());
         depth++;
         super.visit(literal);
         depth--;
@@ -45,21 +59,28 @@ public class SqlNodeTreePrintVisitor extends SqlBasicVisitor<Object> {
 
     @Override
     public Object visit(SqlCall call) {
-        log.info("{}SqlCall[{}]: type={} SqlOperator={},OperandList=[{}]",getLogPrefix(),
-                call.getParserPosition().toString(),
-                call.getClass().getSimpleName(),
-                call.getOperator(),
-                call.getOperandList().stream().map(
-                        x->{
-                            if(x == null){
+        StringBuilder sb = new StringBuilder();
+        sb.append(getLogPrefix()).append("SqlCall");
+        if (withPosition) {
+            sb.append("[").append(call.getParserPosition().toString()).append("]");
+        }
+        sb.append(": type=").append(call.getClass().getSimpleName());
+        if (withDetail) {
+            sb.append(", SqlOperator=").append(call.getOperator())
+                    .append(", OperandList=[");
+            if (!call.getOperandList().isEmpty()) {
+                sb.append(call.getOperandList().stream().map(
+                        x -> {
+                            if (x == null) {
                                 return "NULL";
-                            }
-                            if (x instanceof SqlNodeList && ((SqlNodeList) x).isEmpty()){
-                                return "[]";
                             }
                             return x.toString();
                         }
                 ).collect(Collectors.joining(",")));
+            }
+            sb.append("]");
+        }
+        log.info(sb.toString());
         depth++;
         super.visit(call);
         depth--;
@@ -68,11 +89,21 @@ public class SqlNodeTreePrintVisitor extends SqlBasicVisitor<Object> {
 
     @Override
     public Object visit(SqlNodeList nodeList) {
-        if(nodeList.isEmpty()){
+        if (ignoreEmptyNodeList && nodeList.isEmpty()) {
             return null;
-        }else {
-            log.info("{}SqlNodeList[{}]: nodeList={}", getLogPrefix(),nodeList.getParserPosition().toString(), nodeList.toString());
         }
+        StringBuilder sb = new StringBuilder();
+        sb.append(getLogPrefix()).append("SqlNodeList");
+        if (withPosition) {
+            sb.append("[").append(nodeList.getParserPosition().toString()).append("]");
+        }
+        sb.append(": nodeList=[");
+        if (!nodeList.isEmpty()) {
+            nodeList.forEach(x -> sb.append(x.toString()).append(","));
+            sb.setLength(sb.length() - 1);
+        }
+        sb.append("]");
+        log.info(sb.toString());
         depth++;
         super.visit(nodeList);
         depth--;
@@ -81,7 +112,13 @@ public class SqlNodeTreePrintVisitor extends SqlBasicVisitor<Object> {
 
     @Override
     public Object visit(SqlIdentifier id) {
-        log.info("{}SqlIdentifier[{}]: name={}",getLogPrefix(),id.getParserPosition().toString(),id.toString());
+        StringBuilder sb = new StringBuilder();
+        sb.append(getLogPrefix()).append("SqlIdentifier");
+        if (withPosition) {
+            sb.append("[").append(id.getParserPosition().toString()).append("]");
+        }
+        sb.append(": name=").append(id.toString());
+        log.info(sb.toString());
         depth++;
         super.visit(id);
         depth--;
@@ -90,7 +127,13 @@ public class SqlNodeTreePrintVisitor extends SqlBasicVisitor<Object> {
 
     @Override
     public Object visit(SqlDataTypeSpec type) {
-        log.info("{}SqlDataTypeSpec[{}]: name={}",getLogPrefix(),type.getParserPosition().toString(),type.toString());
+        StringBuilder sb = new StringBuilder();
+        sb.append(getLogPrefix()).append("SqlDataTypeSpec");
+        if (withPosition) {
+            sb.append("[").append(type.getParserPosition().toString()).append("]");
+        }
+        sb.append(": name=").append(type.toString());
+        log.info(sb.toString());
         depth++;
         super.visit(type);
         depth--;
@@ -99,7 +142,13 @@ public class SqlNodeTreePrintVisitor extends SqlBasicVisitor<Object> {
 
     @Override
     public Object visit(SqlDynamicParam param) {
-        log.info("{}SqlDynamicParam[{}]: name={}",getLogPrefix(),param.getParserPosition().toString(),param.toString());
+        StringBuilder sb = new StringBuilder();
+        sb.append(getLogPrefix()).append("SqlDynamicParam");
+        if (withPosition) {
+            sb.append("[").append(param.getParserPosition().toString()).append("]");
+        }
+        sb.append(": name=").append(param.toString());
+        log.info(sb.toString());
         depth++;
         super.visit(param);
         depth--;
@@ -108,9 +157,19 @@ public class SqlNodeTreePrintVisitor extends SqlBasicVisitor<Object> {
 
     @Override
     public Object visit(SqlIntervalQualifier intervalQualifier) {
-        log.info("{}SqlIntervalQualifier[{}]: timeFrameName={} timeUnitRange={} startPrecision={} fractionalSecondPrecision={}",getLogPrefix(),intervalQualifier.getParserPosition().toString()
-                ,intervalQualifier.timeFrameName,intervalQualifier.timeUnitRange,intervalQualifier.getStartPrecisionPreservingDefault(),
-                intervalQualifier.getFractionalSecondPrecisionPreservingDefault());
+        StringBuilder sb = new StringBuilder();
+        sb.append(getLogPrefix()).append("SqlIntervalQualifier");
+        if (withPosition) {
+            sb.append("[").append(intervalQualifier.getParserPosition().toString()).append("]");
+        }
+        sb.append(": type=").append(intervalQualifier.typeName().toString());
+        if (withDetail) {
+            sb.append("timeFrameName=").append(intervalQualifier.timeFrameName)
+                    .append(" timeUnitRange=").append(intervalQualifier.timeUnitRange)
+                    .append(" startPrecision=").append(intervalQualifier.getStartPrecisionPreservingDefault())
+                    .append(" fractionalSecondPrecision=").append(intervalQualifier.getFractionalSecondPrecisionPreservingDefault());
+        }
+        log.info(sb.toString());
         depth++;
         super.visit(intervalQualifier);
         depth--;

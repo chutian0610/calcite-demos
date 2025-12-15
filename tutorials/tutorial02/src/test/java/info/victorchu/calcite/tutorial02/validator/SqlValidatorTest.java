@@ -1,6 +1,7 @@
 package info.victorchu.calcite.tutorial02.validator;
 
 import com.google.common.collect.ImmutableList;
+import org.apache.calcite.sql.validate.ExtendCalciteSqlValidator;
 import info.victorchu.calcite.util.SqlNodeTreePrintVisitor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.adapter.jdbc.JdbcSchema;
@@ -13,7 +14,6 @@ import org.apache.calcite.prepare.CalciteSqlValidator;
 import org.apache.calcite.schema.Schema;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlOperatorTable;
-import org.apache.calcite.sql.dialect.MysqlSqlDialect;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
@@ -107,7 +107,27 @@ public class SqlValidatorTest {
             throw new RuntimeException(
                     "parse failed: " + e.getMessage(), e);
         }
+        SqlNodeTreePrintVisitor visitor = new SqlNodeTreePrintVisitor();
+        sqlNode.accept(visitor);
         SqlValidator sqlValidator =  new CalciteSqlValidator(sqlOperatorTable, catalogReader, typeFactory,
+                validatorConfig);
+        sqlValidator.validate(sqlNode);
+        SqlNodeTreePrintVisitor visitor2 = new SqlNodeTreePrintVisitor();
+        sqlNode.accept(visitor2);
+    }
+    @Test
+    public void testQuery02(){
+        String sql = "select * from mysql.customer limit 10";
+        SqlParser parser = SqlParser.create(sql, parserConfig);
+        SqlNode sqlNode;
+        try {
+            sqlNode = parser.parseStmt();
+        } catch (SqlParseException e) {
+            throw new RuntimeException(
+                    "parse failed: " + e.getMessage(), e);
+        }
+        // use ExtendCalciteSqlValidator to validate sqlNode
+        SqlValidator sqlValidator =  new ExtendCalciteSqlValidator(sqlOperatorTable, catalogReader, typeFactory,
                 validatorConfig);
         sqlValidator.validate(sqlNode);
     }

@@ -131,4 +131,24 @@ public class SqlValidatorTest {
                 validatorConfig);
         sqlValidator.validate(sqlNode);
     }
+    @Test
+    public void testQuery03(){
+        String sql = "select o_custkey, count(*) as order_count\n" +
+                "from orders\n" +
+                "group by o_custkey\n" +
+                "order by order_count desc\n" +
+                "limit 10";
+        SqlParser parser = SqlParser.create(sql, parserConfig);
+        SqlNode sqlNode;
+        try {
+            sqlNode = parser.parseStmt();
+        } catch (SqlParseException e) {
+            throw new RuntimeException(
+                    "parse failed: " + e.getMessage(), e);
+        }
+        // use ExtendCalciteSqlValidator to validate sqlNode
+        SqlValidator sqlValidator =  new ExtendCalciteSqlValidator(sqlOperatorTable, catalogReader, typeFactory,
+                validatorConfig);
+        sqlValidator.validate(sqlNode);
+    }
 }

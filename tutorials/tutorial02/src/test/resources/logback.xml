@@ -8,7 +8,7 @@
             <pattern>${ENCODER_PATTERN}</pattern>
         </encoder>
     </appender>
-    <logger name="org.apache.calcite.sql.parser" level="trace"/>
+    <!-- <logger name="org.apache.calcite.sql.parser" level="trace"/> -->
     <!-- root Logger 配置-->
     <root level="debug">
         <appender-ref ref="console"/>

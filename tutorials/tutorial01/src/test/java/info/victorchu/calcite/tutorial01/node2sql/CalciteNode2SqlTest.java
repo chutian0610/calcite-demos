@@ -22,13 +22,13 @@ public class CalciteNode2SqlTest {
     @SneakyThrows
     @Test
     public void sqlToNode02(){
-        String sql = "select c1+c2+c3 from users";
+        String sql = "select c1+c2+c3, count(1) from users";
         SqlParser parser = SqlParser.create(sql,SqlParser.Config.DEFAULT);
         SqlNode node = parser.parseQuery();
         SqlNodeTreePrintVisitor visitor = new SqlNodeTreePrintVisitor();
         node.accept(visitor);
         String formatSql = node.toSqlString(MysqlSqlDialect.DEFAULT).getSql();
-        Assertions.assertEquals("SELECT `C1` + `C2` + `C3`\n" +
+        Assertions.assertEquals("SELECT `C1` + `C2` + `C3`, COUNT(1)\n" +
                 "FROM `USERS`" ,formatSql);
     }
 }

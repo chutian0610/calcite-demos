@@ -121,6 +121,7 @@ public class ExtendQueryCalciteSqlValidator extends CalciteSqlValidator {
                 for (SqlValidatorScope sqlValidatorScope : children) {
                     log.info(scopeTree2String(cursor, sqlValidatorScope));
                     listIterator.add(sqlValidatorScope);
+                    listIterator.previous();
                 }
             }
         }
@@ -135,6 +136,18 @@ public class ExtendQueryCalciteSqlValidator extends CalciteSqlValidator {
             } else {
                 if(parent instanceof CatalogScope){
                     topLevel.add(delegatingScope);
+                }
+                if(delegatingScope instanceof JoinScope){
+                    JoinScope joinScope = (JoinScope) delegatingScope;
+                    if(joinScope.getUsingScope() != null){
+                        DelegatingScope usingScope = (DelegatingScope) joinScope.getUsingScope();
+                         if (scopeTree.containsKey(usingScope)) {
+                            scopeTree.get(usingScope).add(delegatingScope);
+                        } else {
+                            scopeTree.computeIfAbsent(usingScope, x -> new IdentityHashSet<SqlValidatorScope>())
+                                    .add(delegatingScope);
+                        }
+                    }
                 }
                 // other Scope in sql
                 if (scopeTree.containsKey(parent)) {

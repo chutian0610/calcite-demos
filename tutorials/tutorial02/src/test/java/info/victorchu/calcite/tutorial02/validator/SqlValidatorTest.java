@@ -151,11 +151,19 @@ public class SqlValidatorTest {
 
     @Test
     public void testQuery03() {
-        String sql = "select o_custkey, count(*) as order_count\n" +
-                "from mysql.orders\n" +
-                "group by o_custkey\n" +
-                "order by order_count desc\n" +
-                "limit 10";
+        String sql = "SELECT \n" + //
+                        "    o.o_orderkey,\n" + //
+                        "    o.o_orderdate,\n" + //
+                        "    o.o_totalprice,\n" + //
+                        "    c.c_name,\n" + //
+                        "    c.c_address,\n" + //
+                        "    c.c_phone\n" + //
+                        "FROM mysql.orders o\n" + //
+                        "JOIN mysql.customer c ON o.o_custkey = c.c_custkey\n" + //
+                        "WHERE o.o_orderdate >= '1995-01-01'\n" + //
+                        "  AND o.o_orderdate < '1996-01-01'\n" + //
+                        "ORDER BY o.o_totalprice DESC\n" + //
+                        "LIMIT 20";
         SqlParser parser = SqlParser.create(sql, parserConfig);
         SqlNode sqlNode;
         try {

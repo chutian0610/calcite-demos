@@ -64,7 +64,7 @@ public class ExtendQueryCalciteSqlValidator extends CalciteSqlValidator {
                 ListScope scope = (ListScope) wrapper.data;
                 nameSpace = scope.getChildren().stream().map(y->y.getType().toString()).collect(Collectors.joining(","));
             }
-            String scopeInfo = String.format("scope_%s = { sql=%s,\n nameSpace=%s }",
+            String scopeInfo = String.format("scope_%s = { sql=%s,\n nameSpaces=%s }",
                     wrapper.id,
                     wrapper.data.getNode().toString().replaceAll("\n"," "),
                     nameSpace == null? "NULL": "["+nameSpace+"]"

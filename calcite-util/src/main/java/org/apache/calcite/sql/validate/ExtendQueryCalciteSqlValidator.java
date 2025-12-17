@@ -2,7 +2,6 @@ package org.apache.calcite.sql.validate;
 
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.IdentityHashMap;
@@ -10,7 +9,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.apache.calcite.adapter.java.JavaTypeFactory;
@@ -32,6 +30,7 @@ import info.victorchu.calcite.util.IdentityHashSet;
 public class ExtendQueryCalciteSqlValidator extends CalciteSqlValidator {
     protected final IdentityHashMap<SqlValidatorScope, IdentityHashSet<SqlValidatorScope>> scopeTree = new IdentityHashMap<>();
     private Optional<SqlValidatorScope> root = Optional.empty();
+    private List<SqlValidatorScope> topLevel = Lists.newArrayList();
 
     @EqualsAndHashCode
     @Builder
@@ -64,13 +63,17 @@ public class ExtendQueryCalciteSqlValidator extends CalciteSqlValidator {
                 ListScope scope = (ListScope) wrapper.data;
                 nameSpace = scope.getChildren().stream().map(y->y.getType().toString()).collect(Collectors.joining(","));
             }
-            String scopeInfo = String.format("scope_%s = { sql=%s,\n nameSpaces=%s }",
-                    wrapper.id,
-                    wrapper.data.getNode().toString().replaceAll("\n"," "),
-                    nameSpace == null? "NULL": "["+nameSpace+"]"
+            if(!(wrapper.data instanceof CatalogScope)){
+                String scopeInfo = String.format("scope_%s = { sql=%s,\n nameSpaces=%s }",
+                        wrapper.id,
+                        wrapper.data.getNode().toString().replaceAll("\n"," "),
+                        nameSpace == null? "NULL": "["+nameSpace+"]"
 
-            );
-            log.info(scopeInfo);
+                );
+                log.info(scopeInfo);
+            }else {
+                log.info("scope_{} = CatalogScope",wrapper.id);
+            }
         });
     }
     private Wrapper<SqlValidatorScope> registerScope(SqlValidatorScope scope){
@@ -95,11 +98,14 @@ public class ExtendQueryCalciteSqlValidator extends CalciteSqlValidator {
     }
 
     private void printScopeRoot() {
-        Preconditions.checkArgument(root.isPresent());
         log.info("====== print Scope Tree ======");
-        log.info("catalogScope --> {}",scope2String(root.get()));
-
-        List<SqlValidatorScope> cursor = Lists.newArrayList(root.get());
+        List<SqlValidatorScope> cursor = Lists.newArrayList();
+        if (root.isPresent()) {
+            cursor.add(root.get());
+        }else{
+             DelegatingScope random =  (DelegatingScope)topLevel.get(0);
+             cursor.add(random.parent);
+        }
         printScopeTree(cursor); 
     }  
 
@@ -124,11 +130,13 @@ public class ExtendQueryCalciteSqlValidator extends CalciteSqlValidator {
         scopes.entrySet().forEach(item -> {
             DelegatingScope delegatingScope = (DelegatingScope) item.getValue();
             SqlValidatorScope parent = delegatingScope.getParent();
-            if (parent instanceof EmptyScope) {
-                // skip
-            } else if (parent instanceof CatalogScope) {
+            if (delegatingScope instanceof CatalogScope) {
                 root = Optional.of(delegatingScope);
             } else {
+                if(parent instanceof CatalogScope){
+                    topLevel.add(delegatingScope);
+                }
+                // other Scope in sql
                 if (scopeTree.containsKey(parent)) {
                     scopeTree.get(parent).add(delegatingScope);
                 } else {

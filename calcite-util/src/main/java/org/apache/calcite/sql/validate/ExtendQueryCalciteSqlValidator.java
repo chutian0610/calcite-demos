@@ -18,7 +18,6 @@ import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlOperatorTable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import info.victorchu.calcite.util.IdentityHashSet;

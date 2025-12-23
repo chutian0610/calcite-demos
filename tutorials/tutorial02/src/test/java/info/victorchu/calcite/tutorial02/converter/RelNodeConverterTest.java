@@ -53,6 +53,7 @@ public class RelNodeConverterTest extends BaseTest {
                 "  AND o.o_orderdate < '1996-01-01'\n" + //
                 "ORDER BY o.o_totalprice DESC\n" + //
                 "LIMIT 20";
+        log.info(sql);
         SqlParser parser = SqlParser.create(sql, parserConfig);
         SqlNode sqlNode;
         try {
@@ -70,7 +71,9 @@ public class RelNodeConverterTest extends BaseTest {
         RelOptCluster cluster = RelOptCluster.create(planner, new RexBuilder(typeFactory));
         SqlToRelConverter.Config converterConfig = SqlToRelConverter.config()
                 .withTrimUnusedFields(true)
-                .withExpand(false);
+                .withExpand(false)
+                .withInSubQueryThreshold(0) // not convert in subquery to join
+                ;
         SqlToRelConverter converter = new SqlToRelConverter(null,
                 sqlValidator,
                 catalogReader,

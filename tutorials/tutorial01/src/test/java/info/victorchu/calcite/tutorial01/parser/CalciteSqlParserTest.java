@@ -2,6 +2,8 @@ package info.victorchu.calcite.tutorial01.parser;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+
+import org.apache.calcite.config.Lex;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.babel.SqlBabelParserImpl;
@@ -65,5 +67,14 @@ class CalciteSqlParserTest {
         SqlNode sqlNode = sqlParser.parseQuery();
         Assertions.assertEquals("SELECT `MYCOLUMN`.`FUNC`(`A`, `B`)\n" +
                 "FROM `USERS`", sqlNode.toString());
+    }
+    @SneakyThrows
+    @Test
+    public void defaultKeyWord01() {
+        String sql = "SELECT o_orderdate, YEAR(o_orderdate) AS `year` FROM orders";
+        SqlParser sqlParser = SqlParser.create(sql, SqlParser.Config.DEFAULT.withLex(Lex.MYSQL));
+        SqlNode sqlNode = sqlParser.parseQuery();
+        Assertions.assertEquals("SELECT `o_orderdate`, YEAR(`o_orderdate`) AS `year`\n" +
+                                "FROM `orders`", sqlNode.toString());
     }
 }

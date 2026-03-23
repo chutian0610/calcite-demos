@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.function.UnaryOperator;
 
@@ -93,10 +94,12 @@ public abstract class BaseTest {
     }
 
     private void initSchema() {
+        String baseUrl = Optional.ofNullable(System.getenv("MYSQL_BASE_URL")).orElse("localhost:3306");
+        String jdbcUrl = String.format("jdbc:mysql://%s/test?allowPublicKeyRetrieval=true", baseUrl);
         rootSchema = CalciteSchema.createRootSchema(false);
         Map<String, Object> operand = new HashMap<>();
         operand.put("jdbcDriver", "com.mysql.cj.jdbc.Driver");
-        operand.put("jdbcUrl", "jdbc:mysql://localhost:3306/test?allowPublicKeyRetrieval=true");
+        operand.put("jdbcUrl", jdbcUrl);
         operand.put("jdbcUser", "calcite");
         operand.put("jdbcPassword", "apache#calcite");
         operand.put("jdbcSchema", "test");

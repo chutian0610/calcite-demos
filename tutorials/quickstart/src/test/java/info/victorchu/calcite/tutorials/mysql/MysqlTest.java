@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 
 public class MysqlTest {
@@ -29,11 +30,13 @@ public class MysqlTest {
         Connection connection = DriverManager.getConnection("jdbc:calcite:", info);
         calciteConnection = connection.unwrap(CalciteConnection.class);
 
+        String baseUrl = Optional.ofNullable(System.getenv("MYSQL_BASE_URL")).orElse("localhost:3306");
+        String jdbcUrl = String.format("jdbc:mysql://%s/test?allowPublicKeyRetrieval=true", baseUrl);
         // 注册schema
         final SchemaPlus rootSchema = calciteConnection.getRootSchema();
         Map<String, Object> operand = new HashMap<>();
         operand.put("jdbcDriver", "com.mysql.cj.jdbc.Driver");
-        operand.put("jdbcUrl", "jdbc:mysql://localhost:3306/test?allowPublicKeyRetrieval=true");
+        operand.put("jdbcUrl", jdbcUrl);
         operand.put("jdbcUser", "calcite");
         operand.put("jdbcPassword", "apache#calcite");
         operand.put("jdbcSchema", "test");

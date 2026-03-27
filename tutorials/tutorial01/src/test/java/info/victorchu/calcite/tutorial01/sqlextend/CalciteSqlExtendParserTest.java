@@ -3,6 +3,7 @@ package info.victorchu.calcite.tutorial01.sqlextend;
 import info.victorchu.calcite.util.SqlNodeTreePrintVisitor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.calcite.config.Lex;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
@@ -14,34 +15,53 @@ import org.junit.jupiter.api.Test;
 public class CalciteSqlExtendParserTest {
     @SneakyThrows
     @Test
-    public void defaultParseError(){
+    public void defaultParseError() {
         String sql = "select name from ${users}";
         SqlParser sqlParser = SqlParser.create(sql, SqlParser.Config.DEFAULT);
-        Assertions.assertThrows(SqlParseException.class,() ->{
+        Assertions.assertThrows(SqlParseException.class, () -> {
             SqlNode node = sqlParser.parseQuery();
             SqlNodeTreePrintVisitor visitor = new SqlNodeTreePrintVisitor();
             node.accept(visitor);
         });
 
     }
+
     @SneakyThrows
     @Test
-    public void extendParse(){
+    public void extendParse() {
         String sql = "select name from ${users}";
-        SqlParser sqlParser = SqlParser.create(sql, SqlParser.Config.DEFAULT.withParserFactory(SqlExtendParserImpl.FACTORY));
+        SqlParser sqlParser = SqlParser.create(sql,
+                SqlParser.Config.DEFAULT.withParserFactory(SqlExtendParserImpl.FACTORY));
         SqlNode node = sqlParser.parseQuery();
         SqlNodeTreePrintVisitor visitor = new SqlNodeTreePrintVisitor();
         node.accept(visitor);
     }
+
     @SneakyThrows
     @Test
-    public void extendParseError(){
+    public void extendParseError() {
         String sql = "select name from ${sys.users}";
-        SqlParser sqlParser = SqlParser.create(sql, SqlParser.Config.DEFAULT.withParserFactory(SqlExtendParserImpl.FACTORY));
-        Assertions.assertThrows(SqlParseException.class,() ->{
+        SqlParser sqlParser = SqlParser.create(sql,
+                SqlParser.Config.DEFAULT.withParserFactory(SqlExtendParserImpl.FACTORY));
+        Assertions.assertThrows(SqlParseException.class, () -> {
             SqlNode node = sqlParser.parseQuery();
             SqlNodeTreePrintVisitor visitor = new SqlNodeTreePrintVisitor();
             node.accept(visitor);
         });
+    }
+
+    /**
+     * keyword 函数扩展
+     */
+    @SneakyThrows
+    @Test
+    public void defaultParseSimpleFunction() {
+        String sql = "select day(name) from users";
+        SqlParser sqlParser = SqlParser.create(sql,
+                SqlParser.Config.DEFAULT.withParserFactory(SqlExtendParserImpl.FACTORY)
+        );
+        SqlNode sqlNode = sqlParser.parseQuery();
+        Assertions.assertEquals("SELECT `DAY`(`NAME`)\n" +
+                "FROM `USERS`", sqlNode.toString());
     }
 }
